@@ -2,7 +2,7 @@
 
 A fork of [Vimium](https://github.com/philc/vimium) that adds **taiko hints**: follow links by
 typing a drum pattern of "don" and "ka", in the style of Taiko no Tatsujin. Everything else is
-Vimium, including its normal link hints on `f`.
+Vimium. Taiko hints take Vimium's link hint keys, and Vimium's letter hints move to `s`.
 
 ## Installation
 
@@ -40,19 +40,19 @@ Each hint is drawn as a row of squares: red for don, blue for ka.
 
 | Key     | Action                          |
 | ------- | ------------------------------- |
-| `s`     | Open a link in the current tab  |
-| `S`     | Open a link in a new tab        |
-| `<a-s>` | Open multiple links in new tabs |
-| `ys`    | Copy a link URL                 |
+| `f`     | Open a link in the current tab  |
+| `F`     | Open a link in a new tab        |
+| `<a-f>` | Open multiple links in new tabs |
+| `yf`    | Copy a link URL                 |
 
 Don is `f` and `j`, ka is `d` and `k`, as on a Taiko no Tatsujin keyboard layout. Both can be
-changed on the options page, under "Taiko hints".
+changed on the options page, under "Keys used for taiko hints".
 
 Every link hints command accepts the `taiko` option, so any of them can use taiko hints:
 
 ```
 map <a-S> LinkHints.activateModeToOpenInNewForegroundTab taiko
-map gs LinkHints.activateMode action=hover taiko
+map gh LinkHints.activateMode action=hover taiko
 ```
 
 ### How hints are formed
@@ -73,6 +73,8 @@ map gs LinkHints.activateMode action=hover taiko
   and ignored.
 
 `Backspace`, `Space` (rotate overlapping hints), `Shift` and `Ctrl` work as in Vimium's link hints.
+
+Vimium's own letter hints are on `s`, `S`, `<a-s>` and `ys`.
 
 ## License
 

@@ -1,3 +1,6 @@
+// The `taiko` option, shared by all of the link hints commands.
+const taikoOption = "use taiko hints: type a drum pattern of don and ka instead of letters.";
+
 // This is the order they will be shown in the help dialog.
 //
 // Properties:
@@ -191,6 +194,7 @@ const allCommands = [
     options: {
       action: "one of `hover`, `focus`, `copy-text`. When a link is selected, " +
         "instead of clicking on the link, perform the specified action.",
+      taiko: taikoOption,
     },
     group: "navigation",
     advanced: true,
@@ -199,18 +203,27 @@ const allCommands = [
   {
     name: "LinkHints.activateModeToOpenInNewTab",
     desc: "Open a link in a new tab",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
   },
 
   {
     name: "LinkHints.activateModeToOpenInNewForegroundTab",
     desc: "Open a link in a new tab & switch to it",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
   },
 
   {
     name: "LinkHints.activateModeWithQueue",
     desc: "Open multiple links in a new tab",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
     advanced: true,
     noRepeat: true,
@@ -219,6 +232,9 @@ const allCommands = [
   {
     name: "LinkHints.activateModeToDownloadLink",
     desc: "Download link url",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
     advanced: true,
   },
@@ -226,6 +242,9 @@ const allCommands = [
   {
     name: "LinkHints.activateModeToOpenIncognito",
     desc: "Open a link in incognito window",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
     advanced: true,
   },
@@ -233,6 +252,9 @@ const allCommands = [
   {
     name: "LinkHints.activateModeToCopyLinkUrl",
     desc: "Copy a link URL to the clipboard",
+    options: {
+      taiko: taikoOption,
+    },
     group: "navigation",
     advanced: true,
   },

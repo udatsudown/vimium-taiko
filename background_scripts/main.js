@@ -526,7 +526,7 @@ const HintCoordinator = {
   async prepareToActivateLinkHintsMode(
     tabId,
     originatingFrameId,
-    { modeIndex, requestedByHelpDialog, isExtensionPage },
+    { modeIndex, requestedByHelpDialog, isExtensionPage, taiko },
   ) {
     const frameIds = await getFrameIdsForTab(tabId);
     // If link hints was triggered on a Vimium extension page (like the vimium help dialog or
@@ -583,6 +583,7 @@ const HintCoordinator = {
           originatingFrameId: originatingFrameId,
           frameIdToHintDescriptors: outgoingFrameIdToHintDescriptors,
           modeIndex: modeIndex,
+          taiko: !!taiko,
         },
         { frameId },
       ).catch((error) => {

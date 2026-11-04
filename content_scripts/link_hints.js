@@ -184,7 +184,7 @@ const HintCoordinator = {
     chrome.runtime.sendMessage(request);
   },
 
-  prepareToActivateMode(mode, onExit) {
+  prepareToActivateMode(mode, onExit, taiko = false) {
     // We need to communicate with the background page (and other frames) to initiate link-hints
     // mode. To prevent other Vimium commands from being triggered before link-hints mode is
     // launched, we install a temporary mode to block (and cache) keyboard events.
@@ -211,6 +211,7 @@ const HintCoordinator = {
     chrome.runtime.sendMessage({
       handler: "prepareToActivateLinkHintsMode",
       modeIndex: availableModes.indexOf(mode),
+      taiko,
       isExtensionPage,
       requestedByHelpDialog: globalThis.isVimiumHelpDialog,
     });
@@ -245,7 +246,7 @@ const HintCoordinator = {
   // descriptors. We also propagate the key state between frames. Therefore, the hint-selection
   // process proceeds in lock step in every frame, and this.linkHintsMode is in the same state in
   // every frame.
-  activateMode({ frameId, frameIdToHintDescriptors, modeIndex, originatingFrameId }) {
+  activateMode({ frameId, frameIdToHintDescriptors, modeIndex, originatingFrameId, taiko }) {
     // We do not receive the frame's own hint descritors back from the background page. Instead, we
     // merge them with the hint descriptors from other frames here. Note that
     // this.localHintDescriptors can be null if "getHintDescriptors" failed in this frame when it
@@ -263,7 +264,7 @@ const HintCoordinator = {
     if (frameId !== originatingFrameId) {
       this.onExit = [];
     }
-    this.linkHintsMode = new LinkHintsMode(hintDescriptors, availableModes[modeIndex]);
+    this.linkHintsMode = new LinkHintsMode(hintDescriptors, availableModes[modeIndex], taiko);
     // Replay keydown events which we missed (but for filtered hints only).
     if (Settings.get("filterLinkHints" && this.cacheAllKeydownEvents)) {
       this.cacheAllKeydownEvents.replayKeydownEvents();
@@ -309,9 +310,10 @@ const HintCoordinator = {
 };
 
 const LinkHints = {
-  activateMode(count, { mode, registryEntry }) {
+  activateMode(count, { mode, registryEntry, taiko }) {
     if (count == null) count = 1;
     if (mode == null) mode = OPEN_IN_CURRENT_TAB;
+    if (taiko == null) taiko = !!registryEntry?.options.taiko;
 
     switch (registryEntry?.options.action) {
       case "copy-text":
@@ -330,35 +332,35 @@ const LinkHints = {
         if (isSuccess) {
           // Wait for the next tick to allow the previous mode to exit. It might yet generate a
           // click event, which would cause our new mode to exit immediately.
-          Utils.nextTick(() => LinkHints.activateMode(count - 1, { mode }));
+          Utils.nextTick(() => LinkHints.activateMode(count - 1, { mode, taiko }));
         }
-      });
+      }, taiko);
     }
   },
 
-  activateModeToOpenInNewTab(count) {
-    this.activateMode(count, { mode: OPEN_IN_NEW_BG_TAB });
+  activateModeToOpenInNewTab(count, { registryEntry } = {}) {
+    this.activateMode(count, { mode: OPEN_IN_NEW_BG_TAB, registryEntry });
   },
-  activateModeToOpenInNewForegroundTab(count) {
-    this.activateMode(count, { mode: OPEN_IN_NEW_FG_TAB });
+  activateModeToOpenInNewForegroundTab(count, { registryEntry } = {}) {
+    this.activateMode(count, { mode: OPEN_IN_NEW_FG_TAB, registryEntry });
   },
-  activateModeToCopyLinkUrl(count) {
-    this.activateMode(count, { mode: COPY_LINK_URL });
+  activateModeToCopyLinkUrl(count, { registryEntry } = {}) {
+    this.activateMode(count, { mode: COPY_LINK_URL, registryEntry });
   },
-  activateModeWithQueue() {
-    this.activateMode(1, { mode: OPEN_WITH_QUEUE });
+  activateModeWithQueue(_count, { registryEntry } = {}) {
+    this.activateMode(1, { mode: OPEN_WITH_QUEUE, registryEntry });
   },
-  activateModeToOpenIncognito(count) {
-    this.activateMode(count, { mode: OPEN_INCOGNITO });
+  activateModeToOpenIncognito(count, { registryEntry } = {}) {
+    this.activateMode(count, { mode: OPEN_INCOGNITO, registryEntry });
   },
-  activateModeToDownloadLink(count) {
-    this.activateMode(count, { mode: DOWNLOAD_LINK_URL });
+  activateModeToDownloadLink(count, { registryEntry } = {}) {
+    this.activateMode(count, { mode: DOWNLOAD_LINK_URL, registryEntry });
   },
 };
 
 class LinkHintsMode {
   // @mode: One of the enums listed at the top of this file.
-  constructor(hintDescriptors, mode) {
+  constructor(hintDescriptors, mode, taiko = false) {
     if (mode == null) mode = OPEN_IN_CURRENT_TAB;
     this.mode = mode;
     // We need documentElement to be ready in order to append links.
@@ -386,7 +388,13 @@ class LinkHintsMode {
     // stable.
     this.stableSortCount = 0;
     this.hintMarkers = hintDescriptors.map((desc) => this.createMarkerFor(desc));
-    this.markerMatcher = Settings.get("filterLinkHints") ? new FilterHints() : new AlphabetHints();
+    if (taiko) {
+      this.markerMatcher = new TaikoHints(() => this.updateVisibleMarkers());
+    } else {
+      this.markerMatcher = Settings.get("filterLinkHints")
+        ? new FilterHints()
+        : new AlphabetHints();
+    }
     this.markerMatcher.fillInMarkers(this.hintMarkers);
 
     this.hintMode = new Mode();
@@ -416,6 +424,7 @@ class LinkHintsMode {
     });
 
     this.renderHints();
+    this.markerMatcher.layoutMarkers?.(this.hintMarkers);
     this.setIndicator();
   }
 
@@ -590,7 +599,13 @@ class LinkHintsMode {
           if (keyChar === "space") {
             keyChar = " ";
           }
-          if (keyChar.length === 1) {
+          if (this.markerMatcher.handleKey && keyChar.length === 1) {
+            // The matcher only takes some keys (e.g. taiko's don and ka keys); ignore the rest.
+            if (this.markerMatcher.handleKey(keyChar)) {
+              this.tabCount = 0;
+              this.updateVisibleMarkers();
+            }
+          } else if (keyChar.length === 1) {
             this.tabCount = 0;
             this.markerMatcher.pushKeyChar(keyChar);
             this.updateVisibleMarkers();
@@ -839,6 +854,7 @@ class LinkHintsMode {
   }
 
   deactivateMode() {
+    this.markerMatcher?.stop?.();
     this.removeHintMarkers();
     if (this.hintMode != null) this.hintMode.exit();
   }

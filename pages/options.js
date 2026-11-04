@@ -22,6 +22,10 @@ const options = {
   searchEngines: "string",
   settingsVersion: "string", // This is a hidden field.
   smoothScroll: "boolean",
+  taikoDonKeys: "string",
+  taikoKaKeys: "string",
+  taikoRestTimeout: "number",
+  taikoEndTimeout: "number",
   userDefinedLinkHintCss: "string",
   waitForEnterForFilteredHints: "boolean",
 };

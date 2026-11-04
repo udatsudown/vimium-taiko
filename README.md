@@ -1,3 +1,87 @@
+# Vimium Taiko
+
+A fork of [Vimium](https://github.com/philc/vimium) that adds **taiko hints**: follow links by
+typing a drum pattern of "don" and "ka", in the style of Taiko no Tatsujin. Everything else is
+Vimium, including its normal link hints on `f`.
+
+## Installation
+
+Vimium Taiko replaces Vimium. If you have Vimium installed, turn it off first, or both will react to
+every key.
+
+Download the files from the [latest release](../../releases/latest).
+
+**Chrome, Edge and Brave**
+
+1. Download `vimium-taiko-chrome-store-<version>.zip` and unzip it.
+1. Open `chrome://extensions` (`edge://extensions` on Edge, `brave://extensions` on Brave).
+1. Turn on "Developer mode".
+1. Click "Load unpacked" and choose the unzipped folder.
+
+The browser loads the extension from that folder, so keep it where it is. To update, unzip the new
+version into the same folder and click the reload button on the extension's card.
+
+**Firefox**
+
+1. Download `vimium-taiko-<version>.xpi`.
+1. Open `about:addons`, click the gear button, choose "Install Add-on From File…" and pick the file.
+
+To update, install the new file the same way.
+
+**From source**
+
+Clone this repository. On Chrome, load the cloned folder as above. On Firefox, see
+[Installing From Source](CONTRIBUTING.md#installing-from-source); this needs
+[Deno](https://deno.com).
+
+## Taiko hints
+
+Each hint is drawn as a row of squares: red for don, blue for ka.
+
+| Key     | Action                          |
+| ------- | ------------------------------- |
+| `s`     | Open a link in the current tab  |
+| `S`     | Open a link in a new tab        |
+| `<a-s>` | Open multiple links in new tabs |
+| `ys`    | Copy a link URL                 |
+
+Don is `f` and `j`, ka is `d` and `k`, as on a Taiko no Tatsujin keyboard layout. Both can be
+changed on the options page, under "Taiko hints".
+
+Every link hints command accepts the `taiko` option, so any of them can use taiko hints:
+
+```
+map <a-S> LinkHints.activateModeToOpenInNewForegroundTab taiko
+map gs LinkHints.activateMode action=hover taiko
+```
+
+### How hints are formed
+
+- A hint is one or more phrases of 1 to 5 notes, separated by rests (short pauses).
+- Only a phrase of 1, 3 or 5 notes can be followed by a rest. A phrase of 2 or 4 notes only ends a
+  hint: when you alternate hands, stopping after an even number of notes and going on feels wrong.
+- Hints are handed out shortest first: the 62 single phrases (`2 + 4 + 8 + 16 + 32`), then a 1-note
+  phrase, a rest and any phrase (`2 × 62`), then 3- and 5-note phrases followed by a rest
+  (`40 × 62`), and so on.
+
+### Typing
+
+- A pause of about 1.6 times your tempo counts as a rest.
+- A hint is selected as soon as it is the only one that matches, or when the pause after a rest goes
+  on (700ms by default).
+- If a note after a rest doesn't fit any hint with a rest there, the rest is taken as a hesitation
+  and ignored.
+
+`Backspace`, `Space` (rotate overlapping hints), `Shift` and `Ctrl` work as in Vimium's link hints.
+
+## License
+
+Vimium Taiko is released under the MIT license, like Vimium. See [MIT-LICENSE.txt](MIT-LICENSE.txt).
+
+The rest of this README is Vimium's own. Its installation links are for Vimium, not Vimium Taiko.
+
+---
+
 # Vimium - The Hacker's Browser
 
 Vimium is a browser extension that provides keyboard-based navigation and control of the web in the

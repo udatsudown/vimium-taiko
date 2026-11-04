@@ -438,6 +438,10 @@ const defaultKeyMappings = {
   "F": "LinkHints.activateModeToOpenInNewTab",
   "<a-f>": "LinkHints.activateModeWithQueue",
   "yf": "LinkHints.activateModeToCopyLinkUrl",
+  "s": "LinkHints.activateMode taiko",
+  "S": "LinkHints.activateModeToOpenInNewTab taiko",
+  "<a-s>": "LinkHints.activateModeWithQueue taiko",
+  "ys": "LinkHints.activateModeToCopyLinkUrl taiko",
 
   // Using find
   "/": "enterFindMode",

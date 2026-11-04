@@ -131,6 +131,47 @@ div.internal-vimium-hint-marker > .matchingCharacter {
   color: #d4ac3a;
 }
 
+/* Taiko hints: a red square per don, a blue square per ka, and an empty square per rest. */
+div.internal-vimium-hint-marker.vimium-taiko-hint {
+  background: #2a2a2a;
+  border: solid 1px #000;
+  border-radius: 2px;
+  padding: 1px;
+  line-height: 0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint span.vimium-taiko-note {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 0 0 1px;
+  vertical-align: middle;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint span.vimium-taiko-note:first-child {
+  margin-left: 0;
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint span.vimium-taiko-don {
+  background: #f04a24;
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint span.vimium-taiko-ka {
+  background: #3cb6d8;
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint span.vimium-taiko-rest {
+  background: none;
+  border-color: transparent;
+}
+
+div.internal-vimium-hint-marker.vimium-taiko-hint > .matchingCharacter {
+  opacity: 0.2;
+}
+
 div > .vimiumActiveHintMarker span {
   color: #a07555 !important;
 }

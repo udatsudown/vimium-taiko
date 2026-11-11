@@ -8,8 +8,9 @@
 //     length can only end the hint. When you alternate hands, stopping after an even number of
 //     notes and then continuing feels wrong, so the pattern never asks for it.
 //
-// Hints are handed out shortest first: all 62 single phrases, then "d rest <phrase>",
-// "k rest <phrase>", then 3- and 5-note phrases followed by a rest, and so on.
+// Hints are handed out by number of notes, fewest first; rests aren't counted. Among hints with
+// the same number of notes, those with fewer rests come first: d, k, dd ... kk, then
+// "d rest d" ... "k rest k", then the 3-note hints, and so on.
 //
 // Typing:
 //   - A pause of about 1.6x the current typing tempo inserts a rest.
@@ -39,20 +40,43 @@ const TaikoPattern = {
     return phrases;
   })(),
 
-  // Returns `count` hint strings in the order they are handed out.
+  // Returns `count` hint strings in the order they are handed out: fewest notes first (rests aren't
+  // counted), then fewest rests, then shorter leading phrases.
   hintStrings(count) {
-    const { REST, phrases } = this;
-    const oddPhrases = phrases.filter((p) => p.length % 2 === 1);
-    const hints = phrases.map((p) => p + REST);
-    let heads = [""];
-    while (hints.length < count) {
-      heads = heads.flatMap((head) => oddPhrases.map((p) => head ? head + REST + p : p));
-      for (const head of heads) {
-        if (hints.length >= count) break;
-        for (const p of phrases) hints.push(head + REST + p + REST);
+    const hints = [];
+    for (let notes = 1; hints.length < count; notes++) {
+      for (let rests = 0; rests < notes && hints.length < count; rests++) {
+        for (const lengths of this.phraseLengths(notes, rests + 1)) {
+          if (hints.length >= count) break;
+          hints.push(...this.hintsWithLengths(lengths));
+        }
       }
     }
     return hints.slice(0, count);
+  },
+
+  // The ways to split `notes` notes into `parts` phrases of 1 to MAX_PHRASE notes, where every
+  // phrase but the last has an odd length. Shorter leading phrases come first.
+  phraseLengths(notes, parts) {
+    if (parts === 1) return notes <= this.MAX_PHRASE ? [[notes]] : [];
+    const result = [];
+    for (let first = 1; first <= this.MAX_PHRASE && first < notes; first += 2) {
+      for (const rest of this.phraseLengths(notes - first, parts - 1)) {
+        result.push([first, ...rest]);
+      }
+    }
+    return result;
+  },
+
+  // All hints made of phrases of the given lengths, e.g. [1, 2] gives "d|dd|", "d|dk|", ...
+  hintsWithLengths(lengths) {
+    return lengths.reduce(
+      (heads, length) =>
+        heads.flatMap((head) =>
+          this.phrases.filter((p) => p.length === length).map((p) => head + p + this.REST)
+        ),
+      [""],
+    );
   },
 };
 

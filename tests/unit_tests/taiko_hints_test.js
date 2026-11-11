@@ -11,20 +11,28 @@ const phrasesOf = (hint) => hint.slice(0, -1).split(REST);
 context("TaikoPattern.hintStrings", () => {
   const hints = TaikoPattern.hintStrings(3000);
 
-  should("start with all 62 single phrases of 1 to 5 notes, shortest first", () => {
-    const singles = hints.slice(0, 62);
-    assert.equal(["d|", "k|", "dd|", "dk|", "kd|", "kk|"], singles.slice(0, 6));
-    assert.equal("kkkkk|", singles[61]);
-    assert.isTrue(singles.every((h) => phrasesOf(h).length === 1));
+  const notesOf = (hint) => hint.replaceAll(REST, "").length;
+  const restsOf = (hint) => phrasesOf(hint).length - 1;
+
+  should("hand out the fewest notes first, then the fewest rests", () => {
+    assert.equal(["d|", "k|", "dd|", "dk|", "kd|", "kk|", "d|d|", "d|k|", "k|d|", "k|k|"], [
+      ...hints.slice(0, 10),
+    ]);
+    assert.equal("ddd|", hints[10]);
+    assert.equal("d|dd|", hints[18]);
+    assert.equal("d|d|d|", hints[26]);
+    assert.equal("dddd|", hints[34]);
+    for (let i = 1; i < hints.length; i++) {
+      const [a, b] = [hints[i - 1], hints[i]];
+      assert.isTrue(
+        notesOf(a) < notesOf(b) || (notesOf(a) === notesOf(b) && restsOf(a) <= restsOf(b)),
+      );
+    }
   });
 
-  should("continue with a 1-note phrase, a rest and any phrase", () => {
-    assert.equal("d|d|", hints[62]);
-    assert.equal("d|kkkkk|", hints[123]);
-    assert.equal("k|d|", hints[124]);
-    assert.equal("ddd|d|", hints[186]);
-    assert.equal("kkkkk|kkkkk|", hints[2665]);
-    assert.equal("d|d|d|", hints[2666]);
+  should("give every hint of up to 5 notes before any longer one", () => {
+    assert.equal(370, hints.filter((h) => notesOf(h) <= 5).length);
+    assert.isTrue(hints.slice(0, 370).every((h) => notesOf(h) <= 5));
   });
 
   should("only put a rest after a phrase of odd length", () => {

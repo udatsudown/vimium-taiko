@@ -434,15 +434,11 @@ const defaultKeyMappings = {
   "V": "enterVisualLineMode",
 
   // Link hints
-  // Taiko hints take Vimium's link hint keys. Vimium's letter hints move to s.
+  // Taiko hints take Vimium's link hint keys. Vimium's letter hints have no default keys.
   "f": "LinkHints.activateMode taiko",
   "F": "LinkHints.activateModeToOpenInNewTab taiko",
   "<a-f>": "LinkHints.activateModeWithQueue taiko",
   "yf": "LinkHints.activateModeToCopyLinkUrl taiko",
-  "s": "LinkHints.activateMode",
-  "S": "LinkHints.activateModeToOpenInNewTab",
-  "<a-s>": "LinkHints.activateModeWithQueue",
-  "ys": "LinkHints.activateModeToCopyLinkUrl",
 
   // Using find
   "/": "enterFindMode",

@@ -2,7 +2,7 @@
 
 A fork of [Vimium](https://github.com/philc/vimium) that adds **taiko hints**: follow links by
 typing a drum pattern of "don" and "ka", in the style of Taiko no Tatsujin. Everything else is
-Vimium. Taiko hints take Vimium's link hint keys, and Vimium's letter hints move to `s`.
+Vimium. Taiko hints take Vimium's link hint keys.
 
 ## Installation
 
@@ -60,9 +60,10 @@ map gh LinkHints.activateMode action=hover taiko
 - A hint is one or more phrases of 1 to 5 notes, separated by rests (short pauses).
 - Only a phrase of 1, 3 or 5 notes can be followed by a rest. A phrase of 2 or 4 notes only ends a
   hint: when you alternate hands, stopping after an even number of notes and going on feels wrong.
-- Hints are handed out shortest first: the 62 single phrases (`2 + 4 + 8 + 16 + 32`), then a 1-note
-  phrase, a rest and any phrase (`2 × 62`), then 3- and 5-note phrases followed by a rest
-  (`40 × 62`), and so on.
+- Hints are handed out by number of notes, fewest first; rests aren't counted. Among hints with the
+  same number of notes, those with fewer rests come first: don, ka, the four 2-note phrases, then
+  the four 2-note hints with a rest in the middle, then 3 notes, and so on. Up to 5 notes, there are
+  370 hints.
 
 ### Typing
 
@@ -74,7 +75,8 @@ map gh LinkHints.activateMode action=hover taiko
 
 `Backspace`, `Space` (rotate overlapping hints), `Shift` and `Ctrl` work as in Vimium's link hints.
 
-Vimium's own letter hints are on `s`, `S`, `<a-s>` and `ys`.
+Vimium's letter hints are still there, without keys. To use them, map the link hints commands
+without the `taiko` option, for example `map s LinkHints.activateMode`.
 
 ## License
 
